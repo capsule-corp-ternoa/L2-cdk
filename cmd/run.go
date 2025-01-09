@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
@@ -30,6 +31,7 @@ import (
 	"github.com/0xPolygon/cdk/l1infotreesync"
 	"github.com/0xPolygon/cdk/lastgersync"
 	"github.com/0xPolygon/cdk/log"
+	"github.com/0xPolygon/cdk/prometheus"
 	"github.com/0xPolygon/cdk/reorgdetector"
 	"github.com/0xPolygon/cdk/rpc"
 	"github.com/0xPolygon/cdk/sequencesender"
@@ -40,6 +42,7 @@ import (
 	"github.com/0xPolygon/zkevm-ethtx-manager/ethtxmanager"
 	ethtxlog "github.com/0xPolygon/zkevm-ethtx-manager/log"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/cli/v2"
 )
 
@@ -802,4 +805,14 @@ func getL2RPCUrl(c *config.Config) string {
 	}
 
 	return c.AggOracle.EVMSender.URLRPCL2
+}
+
+func startMetricsHttpServer(c prometheus.Config) {
+	log.Info("serving metrics at %v:%v", c.Host, c.Port)
+	http.Handle("/metrics", promhttp.Handler())
+	err := http.ListenAndServe(":2223", nil) //nolint:gosec // Ignoring G114: Use of net/http serve function that has no support for setting timeouts.
+	if err != nil {
+		fmt.Printf("error serving http: %v", err)
+		return
+	}
 }
