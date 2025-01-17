@@ -11,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - uses: actions/setup-go@v5
       with:
         go-version: 1.22.x
@@ -42,24 +44,15 @@ jobs:
           - "fork12-rollup"
           - "fork12-pessimistic"
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Checkout kurtosis-cdk repository
+    - name: Checkout Code
       uses: actions/checkout@v4
-      with:
-        go-version: ${{ matrix.go-version }}
-      env:
-        GOARCH: ${{ matrix.goarch }}
-
-    - name: Build Docker
-      run: make build-docker
     
-    - name: Checkout kurtosis-cdk
+    - name: Checkout Kurtosis CDK
       uses: actions/checkout@v4
       with:
         repository: 0xPolygon/kurtosis-cdk
         path: kurtosis-cdk
-        ref: v0.2.24
+        ref: v0.2.25
     
     - name: Install Kurtosis CDK tools
       uses: ./kurtosis-cdk/.github/actions/setup-kurtosis-cdk
