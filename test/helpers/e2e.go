@@ -13,6 +13,7 @@ import (
 	"github.com/0xPolygon/cdk/aggoracle"
 	"github.com/0xPolygon/cdk/aggoracle/chaingersender"
 	"github.com/0xPolygon/cdk/bridgesync"
+	cfgTypes "github.com/0xPolygon/cdk/config/types"
 	"github.com/0xPolygon/cdk/etherman"
 	"github.com/0xPolygon/cdk/l1infotreesync"
 	"github.com/0xPolygon/cdk/log"
@@ -104,7 +105,10 @@ func L1Setup(t *testing.T) *L1Environment {
 
 	// Reorg detector
 	dbPathReorgDetectorL1 := path.Join(t.TempDir(), "ReorgDetectorL1.sqlite")
-	rdL1, err := reorgdetector.New(l1Client.Client(), reorgdetector.Config{DBPath: dbPathReorgDetectorL1})
+	rdL1, err := reorgdetector.New(l1Client.Client(), reorgdetector.Config{
+		DBPath:              dbPathReorgDetectorL1,
+		CheckReorgsInterval: cfgTypes.Duration{Duration: time.Millisecond * 100}, //nolint:mnd
+	})
 	require.NoError(t, err)
 	go rdL1.Start(ctx) //nolint:errcheck
 
@@ -117,6 +121,7 @@ func L1Setup(t *testing.T) *L1Environment {
 		rdL1, l1Client.Client(),
 		time.Millisecond, 0, periodRetry,
 		retries, l1infotreesync.FlagAllowWrongContractsAddrs,
+		etherman.SafeBlock,
 	)
 	require.NoError(t, err)
 
@@ -128,7 +133,7 @@ func L1Setup(t *testing.T) *L1Environment {
 		originNetwork          = 1
 		initialBlock           = 0
 		retryPeriod            = 0
-		retriesCount           = 0
+		retriesCount           = 10
 	)
 
 	// Bridge sync
@@ -138,7 +143,7 @@ func L1Setup(t *testing.T) *L1Environment {
 		ctx, dbPathBridgeSyncL1, bridgeL1Addr,
 		syncBlockChunks, etherman.LatestBlock, rdL1, testClient,
 		initialBlock, waitForNewBlocksPeriod, retryPeriod,
-		retriesCount, originNetwork, false)
+		retriesCount, originNetwork, false, etherman.SafeBlock)
 	require.NoError(t, err)
 
 	go bridgeL1Sync.Start(ctx)
@@ -177,7 +182,9 @@ func L2Setup(t *testing.T) *L2Environment {
 
 	// Reorg detector
 	dbPathReorgL2 := path.Join(t.TempDir(), "ReorgDetectorL2.sqlite")
-	rdL2, err := reorgdetector.New(l2Client.Client(), reorgdetector.Config{DBPath: dbPathReorgL2})
+	rdL2, err := reorgdetector.New(l2Client.Client(), reorgdetector.Config{
+		DBPath:              dbPathReorgL2,
+		CheckReorgsInterval: cfgTypes.Duration{Duration: time.Millisecond * 100}}) //nolint:mnd
 	require.NoError(t, err)
 	go rdL2.Start(ctx) //nolint:errcheck
 
@@ -198,7 +205,7 @@ func L2Setup(t *testing.T) *L2Environment {
 		ctx, dbPathL2BridgeSync, bridgeL2Addr, syncBlockChunks,
 		etherman.LatestBlock, rdL2, testClient,
 		initialBlock, waitForNewBlocksPeriod, retryPeriod,
-		retriesCount, originNetwork, false)
+		retriesCount, originNetwork, false, etherman.LatestBlock)
 	require.NoError(t, err)
 
 	go bridgeL2Sync.Start(ctx)
