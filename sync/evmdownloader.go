@@ -167,13 +167,15 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 			// examples:
 			// (sync chunk size = 10), no logs in the range:
 			// 1. fromBlock = 1, toBlock = 10, lastFinalizedBlock = 15, lastBlock = 30
-			//    - fromBlock = 16, toBlock = 30
+			//    - fromBlock = 16, toBlock = 20
 			// 2. fromBlock = 10, toBlock = 20, lastFinalizedBlock = 5, lastBlock = 21
 			//	  - fromBlock = 10, toBlock = 21
 			// 3. fromBlock = 10, toBlock = 20, lastFinalizedBlock = 15, lastBlock = 21
 			//    - fromBlock = 16, toBlock = 21
 			// 4. fromBlock = 10, toBlock = 30, lastFinalizedBlock = 15, lastBlock = 50
 			//   - fromBlock = 16, toBlock = 50
+			// 5. fromBlock = 30, toBlock = 30, lastFinalizedBlock = 15, lastBlock = 31
+			//    - fromBlock = 30, toBlock = 31
 			// (sync chunk size = 10), logs in the range:
 			// 1. fromBlock = 1, toBlock = 10, lastFinalizedBlock = 15, lastBlock = 30, lastBlockWithLogs = 8
 			//    - fromBlock = 9, toBlock = 30
@@ -188,8 +190,10 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 			// until we hit a log or we have finalzied blocks in range, where we will shorten the range, but,
 			// keep in mind, that ethereum after the merge considers the block as finalzied after 2 epochs have passed,
 			// or roughly 64 blocks, or ~12 minutes, so range will never be too big
-			lastBlock = d.WaitForNewBlocks(ctx, toBlock)
-			toBlock = lastBlock
+			if lastBlock == toBlock {
+				// if we reached the tip, wait for new blocks
+				lastBlock = d.WaitForNewBlocks(ctx, toBlock)
+			}
 		}
 	}
 }
