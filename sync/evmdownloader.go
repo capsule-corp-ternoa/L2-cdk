@@ -160,36 +160,6 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 				fromBlock = blocks[blocks.Len()-1].Num + 1
 			}
 
-			// here we will wait for new blocks so we can expand the range
-			// if we are already lagging behind the tip of the chain, the function will immediately return the latest block
-			// if we are not lagging behind, but we are on tip of the chain, the function will wait until it has a new block
-			// which will stop us from spamming the eth client with requests for the same block range
-			// examples:
-			// (sync chunk size = 10), no logs in the range:
-			// 1. fromBlock = 1, toBlock = 10, lastFinalizedBlock = 15, lastBlock = 30
-			//    - fromBlock = 16, toBlock = 20
-			// 2. fromBlock = 10, toBlock = 20, lastFinalizedBlock = 5, lastBlock = 21
-			//	  - fromBlock = 10, toBlock = 21
-			// 3. fromBlock = 10, toBlock = 20, lastFinalizedBlock = 15, lastBlock = 21
-			//    - fromBlock = 16, toBlock = 21
-			// 4. fromBlock = 10, toBlock = 30, lastFinalizedBlock = 15, lastBlock = 50
-			//   - fromBlock = 16, toBlock = 50
-			// 5. fromBlock = 30, toBlock = 30, lastFinalizedBlock = 15, lastBlock = 31
-			//    - fromBlock = 30, toBlock = 31
-			// (sync chunk size = 10), logs in the range:
-			// 1. fromBlock = 1, toBlock = 10, lastFinalizedBlock = 15, lastBlock = 30, lastBlockWithLogs = 8
-			//    - fromBlock = 9, toBlock = 30
-			// 2. fromBlock = 10, toBlock = 20, lastFinalizedBlock = 5, lastBlock = 21, lastBlockWithLogs = 15
-			//	  - fromBlock = 16, toBlock = 21
-			// 3. fromBlock = 10, toBlock = 20, lastFinalizedBlock = 15, lastBlock = 21, lastBlockWithLogs = 12
-			//    - fromBlock = 13, toBlock = 21
-			// 4. fromBlock = 10, toBlock = 50, lastFinalizedBlock = 15, lastBlock = 50, lastBlockWithLogs = 20
-			//    - fromBlock = 21, toBlock = 50
-			// IMPORTANT NOTE:
-			// In this case, where we might have finalized blocks in range, or not, we will keep expanding the range
-			// until we hit a log or we have finalzied blocks in range, where we will shorten the range, but,
-			// keep in mind, that ethereum after the merge considers the block as finalzied after 2 epochs have passed,
-			// or roughly 64 blocks, or ~12 minutes, so range will never be too big
 			if lastBlock == toBlock {
 				// if we reached the tip, wait for new blocks
 				lastBlock = d.WaitForNewBlocks(ctx, toBlock)
