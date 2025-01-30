@@ -133,7 +133,7 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 			continue
 		}
 
-		lastFinalizedBlockNumber := lastFinalizedBlock.Number.Uint64()
+		lastFinalizedBlockNumber := min(lastBlock, lastFinalizedBlock.Number.Uint64())
 
 		d.log.Infof("getting events from blocks %d to  %d. lastFinalizedBlock: %d",
 			fromBlock, toBlock, lastFinalizedBlockNumber)
