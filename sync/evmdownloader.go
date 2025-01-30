@@ -102,7 +102,7 @@ func NewEVMDownloader(
 }
 
 func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, downloadedCh chan EVMBlock) {
-	lastBlock := d.WaitForNewBlocks(ctx, 0)
+	lastBlockInNetwork := d.WaitForNewBlocks(ctx, 0)
 
 	for {
 		select {
@@ -114,16 +114,16 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 		}
 
 		toBlock := fromBlock + d.syncBlockChunkSize
-		if toBlock > lastBlock {
-			toBlock = lastBlock
+		if toBlock > lastBlockInNetwork {
+			toBlock = lastBlockInNetwork
 		}
 
 		if fromBlock > toBlock {
 			d.log.Infof(
 				"waiting for new blocks, last block processed: %d, last block seen on L1: %d",
-				fromBlock-1, lastBlock,
+				fromBlock-1, lastBlockInNetwork,
 			)
-			lastBlock = d.WaitForNewBlocks(ctx, fromBlock-1)
+			lastBlockInNetwork = d.WaitForNewBlocks(ctx, fromBlock-1)
 			continue
 		}
 
@@ -133,7 +133,7 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 			continue
 		}
 
-		lastFinalizedBlockNumber := min(lastBlock, lastFinalizedBlock.Number.Uint64())
+		lastFinalizedBlockNumber := min(lastBlockInNetwork, lastFinalizedBlock.Number.Uint64())
 
 		d.log.Infof("getting events from blocks %d to  %d. lastFinalizedBlock: %d",
 			fromBlock, toBlock, lastFinalizedBlockNumber)
@@ -164,9 +164,9 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 				fromBlock = blocks[blocks.Len()-1].Num + 1
 			}
 
-			if lastBlock == toBlock {
+			if lastBlockInNetwork == toBlock {
 				// if we reached the tip, wait for new blocks
-				lastBlock = d.WaitForNewBlocks(ctx, toBlock)
+				lastBlockInNetwork = d.WaitForNewBlocks(ctx, toBlock)
 			}
 		}
 	}
