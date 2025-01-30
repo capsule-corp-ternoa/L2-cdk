@@ -148,15 +148,19 @@ func (d *EVMDownloader) Download(ctx context.Context, fromBlock uint64, download
 				d.reportEmptyBlock(ctx, downloadedCh, toBlock, lastFinalizedBlockNumber)
 			}
 		} else {
+			// this is the case where we might have some blocks that are not finalized in range
 			d.reportBlocks(downloadedCh, blocks, lastFinalizedBlockNumber)
 
 			if blocks.Len() == 0 {
 				if lastFinalizedBlockNumber > fromBlock &&
 					lastFinalizedBlockNumber-fromBlock > d.syncBlockChunkSize {
+					// if we have a chunk of blocks that are finalized, but we didn't get any events
+					// we need to report that last finalized block as empty to the driver
 					d.reportEmptyBlock(ctx, downloadedCh, fromBlock+d.syncBlockChunkSize, lastFinalizedBlockNumber)
 					fromBlock += d.syncBlockChunkSize + 1
 				}
 			} else {
+				// we had blocks with events, we shrink the chunk size to the last block with events
 				fromBlock = blocks[blocks.Len()-1].Num + 1
 			}
 
