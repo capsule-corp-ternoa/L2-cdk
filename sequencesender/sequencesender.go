@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/0xPolygon/cdk/etherman"
-	"github.com/0xPolygon/cdk/log"
 	"github.com/0xPolygon/cdk/rpc"
 	"github.com/0xPolygon/cdk/rpc/types"
 	"github.com/0xPolygon/cdk/sequencesender/seqsendertypes"
@@ -20,6 +19,7 @@ import (
 	"github.com/0xPolygon/zkevm-ethtx-manager/ethtxmanager"
 	ethtxlog "github.com/0xPolygon/zkevm-ethtx-manager/log"
 	ethtxtypes "github.com/0xPolygon/zkevm-ethtx-manager/types"
+	"github.com/agglayer/aggkit/log"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -29,6 +29,13 @@ const ten = 10
 // EthTxManager represents the eth tx manager interface
 type EthTxManager interface {
 	Start()
+	Add(ctx context.Context,
+		to *common.Address,
+		value *big.Int,
+		data []byte,
+		gasOffset uint64,
+		sidecar *ethtypes.BlobTxSidecar,
+	) (common.Hash, error)
 	AddWithGas(
 		ctx context.Context,
 		to *common.Address,

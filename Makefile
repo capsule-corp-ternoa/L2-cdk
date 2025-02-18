@@ -36,12 +36,12 @@ check-docker:
 check-docker-compose:
 	@which docker-compose > /dev/null || (echo "Error: docker-compose is not installed" && exit 1)
 
-# Check for Protoc
+# Check for protoc
 .PHONY: check-protoc
 check-protoc:
-	@which protoc > /dev/null || (echo "Error: Protoc is not installed" && exit 1)
+	@which protoc > /dev/null || (echo "Error: protoc is not installed" && exit 1)
 
-# Check for Curl
+# Check for curl
 .PHONY: check-curl
 check-curl:
 	@which curl > /dev/null || (echo "Error: curl is not installed" && exit 1)
@@ -56,19 +56,15 @@ install-linter: check-go check-curl
 generate-code-from-proto: check-protoc
 
 .PHONY: build
-build: build-rust build-go  build-tools## Builds the binaries locally into ./target
+build: build-rust build-go ## Builds the binaries locally into ./target
 
 .PHONY: build-rust
 build-rust:
-	export BUILD_SCRIPT_DISABLED=1 && cargo build --release
+	BUILD_SCRIPT_DISABLED=1 cargo build --release --jobs=$(shell nproc)
 
 .PHONY: build-go
 build-go:
 	$(GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(GOBIN)/$(GOBINARY) $(GOCMD)
-
-.PHONY: build-tools
-build-tools: ## Builds the tools
-	$(GOENVVARS) go build -o $(GOBIN)/aggsender_find_imported_bridge ./tools/aggsender_find_imported_bridge
 
 .PHONY: build-docker
 build-docker: ## Builds a docker image with the cdk binary

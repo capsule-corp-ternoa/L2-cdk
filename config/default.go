@@ -202,9 +202,6 @@ DBPath = "{{PathRWData}}/aggregator_db.sqlite"
 [ReorgDetectorL1]
 DBPath = "{{PathRWData}}/reorgdetectorl1.sqlite"
 
-[ReorgDetectorL2]
-DBPath = "{{PathRWData}}/reorgdetectorl2.sqlite"
-
 [L1InfoTreeSync]
 DBPath = "{{PathRWData}}/L1InfoTreeSync.sqlite"
 GlobalExitRootAddr="{{NetworkConfig.L1.GlobalExitRootManagerAddr}}"
@@ -217,107 +214,12 @@ InitialBlock={{genesisBlockNumber}}
 RetryAfterErrorPeriod="1s"
 MaxRetryAttemptsAfterError=-1
 
-[AggOracle]
-TargetChainType="EVM"
-URLRPCL1="{{L1URL}}"
-BlockFinality="FinalizedBlock"
-WaitPeriodNextGER="100ms"
-	[AggOracle.EVMSender]
-		GlobalExitRootL2="{{L2Config.GlobalExitRootAddr}}"
-		URLRPCL2="{{L2URL}}"
-		GasOffset=0
-		WaitPeriodMonitorTx="100ms"
-		[AggOracle.EVMSender.EthTxManager]
-				FrequencyToMonitorTxs = "1s"
-				WaitTxToBeMined = "2s"
-				GetReceiptMaxTime = "250ms"
-				GetReceiptWaitInterval = "1s"
-				PrivateKeys = [
-					{Path = "/app/keystore/aggoracle.keystore", Password = "testonly"},
-				]
-				ForcedGas = 0
-				GasPriceMarginFactor = 1
-				MaxGasPriceLimit = 0
-				StoragePath = "{{PathRWData}}/ethtxmanager-sequencesender.sqlite"
-				ReadPendingL1Txs = false
-				SafeStatusL1NumberOfBlocks = 5
-				FinalizedStatusL1NumberOfBlocks = 10
-					[AggOracle.EVMSender.EthTxManager.Etherman]
-						URL = "{{L2URL}}"
-						MultiGasProvider = false
-						# L1ChainID = 0 indicates it will be set at runtime
-						# This field should be populated with L2ChainID 
-						L1ChainID = 0
-						HTTPHeaders = []
-
 [RPC]
 Host = "0.0.0.0"
 Port = 5576
 ReadTimeout = "2s"
 WriteTimeout = "2s"
 MaxRequestsPerIPAndSecond = 10
-
-[ClaimSponsor]
-DBPath = "{{PathRWData}}/claimsopnsor.sqlite"
-Enabled = true
-SenderAddr = "0xfa3b44587990f97ba8b6ba7e230a5f0e95d14b3d"
-BridgeAddrL2 = "0xB7098a13a48EcE087d3DA15b2D28eCE0f89819B8"
-MaxGas = 200000
-RetryAfterErrorPeriod = "1s"
-MaxRetryAttemptsAfterError = -1
-WaitTxToBeMinedPeriod = "3s"
-WaitOnEmptyQueue = "3s"
-GasOffset = 0
-	[ClaimSponsor.EthTxManager]
-		FrequencyToMonitorTxs = "1s"
-		WaitTxToBeMined = "2s"
-		GetReceiptMaxTime = "250ms"
-		GetReceiptWaitInterval = "1s"
-		PrivateKeys = [
-			{Path = "/app/keystore/claimsopnsor.keystore", Password = "testonly"},
-		]
-		ForcedGas = 0
-		GasPriceMarginFactor = 1
-		MaxGasPriceLimit = 0
-		StoragePath = "{{PathRWData}}/ethtxmanager-claimsponsor.sqlite"
-		ReadPendingL1Txs = false
-		SafeStatusL1NumberOfBlocks = 5
-		FinalizedStatusL1NumberOfBlocks = 10
-			[ClaimSponsor.EthTxManager.Etherman]
-				URL = "{{L2URL}}"
-				MultiGasProvider = false
-				L1ChainID = {{NetworkConfig.L1.L1ChainID}}
-				HTTPHeaders = []
-
-[BridgeL1Sync]
-DBPath = "{{PathRWData}}/bridgel1sync.sqlite"
-BlockFinality = "LatestBlock"
-InitialBlockNum = 0
-BridgeAddr = "{{polygonBridgeAddr}}"
-SyncBlockChunkSize = 100
-RetryAfterErrorPeriod = "1s"
-MaxRetryAttemptsAfterError = -1
-WaitForNewBlocksPeriod = "3s"
-
-[BridgeL2Sync]
-DBPath = "{{PathRWData}}/bridgel2sync.sqlite"
-BlockFinality = "LatestBlock"
-InitialBlockNum = 0
-BridgeAddr = "{{polygonBridgeAddr}}"
-SyncBlockChunkSize = 100
-RetryAfterErrorPeriod = "1s"
-MaxRetryAttemptsAfterError = -1
-WaitForNewBlocksPeriod = "3s"
-
-[LastGERSync]
-DBPath = "{{PathRWData}}/lastgersync.sqlite"
-BlockFinality = "LatestBlock"
-InitialBlockNum = 0
-GlobalExitRootL2Addr = "{{L2Config.GlobalExitRootAddr}}"
-RetryAfterErrorPeriod = "1s"
-MaxRetryAttemptsAfterError = -1
-WaitForNewBlocksPeriod = "1s"
-DownloadBufferSize = 100
 
 [NetworkConfig.L1]
 L1ChainID = {{L1Config.chainId}}
@@ -326,21 +228,4 @@ ZkEVMAddr = "{{L1Config.polygonZkEVMAddress}}"
 RollupManagerAddr = "{{L1Config.polygonRollupManagerAddress}}"
 GlobalExitRootManagerAddr = "{{L1Config.polygonZkEVMGlobalExitRootAddress}}"
 
-
-[AggSender]
-StoragePath = "{{PathRWData}}/aggsender.sqlite"
-AggLayerURL = "{{AggLayerURL}}"
-AggsenderPrivateKey = {Path = "{{SequencerPrivateKeyPath}}", Password = "{{SequencerPrivateKeyPassword}}"}
-URLRPCL2="{{L2URL}}"
-BlockFinality = "LatestBlock"
-EpochNotificationPercentage = 50
-SaveCertificatesToFilesPath = ""
-MaxRetriesStoreCertificate = 3
-DelayBeetweenRetries = "60s"
-KeepCertificatesHistory = true
-# MaxSize of the certificate to 8Mb
-MaxCertSize = 8388608
-BridgeMetadataAsHash = true
-DryRun = false
-EnableRPC = true
 `

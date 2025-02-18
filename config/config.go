@@ -8,18 +8,13 @@ import (
 	"strings"
 
 	jRPC "github.com/0xPolygon/cdk-rpc/rpc"
-	"github.com/0xPolygon/cdk/aggoracle"
 	"github.com/0xPolygon/cdk/aggregator"
-	"github.com/0xPolygon/cdk/aggsender"
-	"github.com/0xPolygon/cdk/bridgesync"
-	"github.com/0xPolygon/cdk/claimsponsor"
 	"github.com/0xPolygon/cdk/common"
 	ethermanconfig "github.com/0xPolygon/cdk/etherman/config"
-	"github.com/0xPolygon/cdk/l1infotreesync"
-	"github.com/0xPolygon/cdk/lastgersync"
-	"github.com/0xPolygon/cdk/log"
-	"github.com/0xPolygon/cdk/reorgdetector"
 	"github.com/0xPolygon/cdk/sequencesender"
+	"github.com/agglayer/aggkit/l1infotreesync"
+	"github.com/agglayer/aggkit/log"
+	"github.com/agglayer/aggkit/reorgdetector"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/viper"
@@ -128,43 +123,30 @@ The file is [TOML format]
 type Config struct {
 	// Configuration of the etherman (client for access L1)
 	Etherman ethermanconfig.Config
+
 	// Configuration of the aggregator
 	Aggregator aggregator.Config
+
 	// Configure Log level for all the services, allow also to store the logs in a file
 	Log log.Config
+
 	// Configuration of the genesis of the network. This is used to known the initial state of the network
 	NetworkConfig NetworkConfig
+
 	// Configuration of the sequence sender service
 	SequenceSender sequencesender.Config
+
 	// Common Config that affects all the services
 	Common common.Config
+
 	// Configuration of the reorg detector service to be used for the L1
 	ReorgDetectorL1 reorgdetector.Config
-	// Configuration of the reorg detector service to be used for the L2
-	ReorgDetectorL2 reorgdetector.Config
-	// Configuration of the aggOracle service
-	AggOracle aggoracle.Config
+
 	// Configuration of the L1 Info Treee Sync service
 	L1InfoTreeSync l1infotreesync.Config
 
 	// RPC is the config for the RPC server
 	RPC jRPC.Config
-
-	// ClaimSponsor is the config for the claim sponsor
-	ClaimSponsor claimsponsor.EVMClaimSponsorConfig
-
-	// BridgeL1Sync is the configuration for the synchronizer of the bridge of the L1
-	BridgeL1Sync bridgesync.Config
-
-	// BridgeL2Sync is the configuration for the synchronizer of the bridge of the L2
-	BridgeL2Sync bridgesync.Config
-
-	// LastGERSync is the config for the synchronizer in charge of syncing the last GER injected on L2.
-	// Needed for the bridge service (RPC)
-	LastGERSync lastgersync.Config
-
-	// AggSender is the configuration of the agg sender service
-	AggSender aggsender.Config
 }
 
 // Load loads the configuration
