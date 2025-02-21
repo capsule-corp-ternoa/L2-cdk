@@ -18,13 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_syncAllEthTxResults2(t *testing.T) {
-	s := SequenceSender{}
-	txSequence, exists := s.ethTransactions[common.Hash{}]
-	require.False(t, exists)
-	require.Nil(t, txSequence)
-}
-
 func Test_sendTx(t *testing.T) {
 	t.Parallel()
 
